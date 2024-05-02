@@ -6,3 +6,4 @@ Laporan pengerjaan soal shift modul 3 Praktikum Sistem Operasi 2024 oleh Kelompo
 3. Muhammad Syahmi Ash Shidqi  : 5027231085
 
 Soal Shift Modul 3
+no 1 
