@@ -194,7 +194,7 @@ void add(const char *day, const char *genre, const char *title, const char *stat
     fprintf(file, "%s,%s,%s,%s\n", day, genre, title, status);
     fclose(file);
 
-    log_action("[ADD]", title);
+    log_action("[ADD]", title, "berhasil");
 }
 
 void delete(const char *title) {
@@ -213,9 +213,16 @@ void delete(const char *title) {
     char buffer[BUFFER_SIZE];
     while (fgets(buffer, BUFFER_SIZE, file) != NULL) {
         char *token = strtok(buffer, ",");
-        if (strcmp(token, title) != 0) {
-            fprintf(temp_file, "%s", buffer);
+        token = strtok(NULL, ","); // Token kedua
+        token = strtok(NULL, ","); // Token ketiga (judul)
+
+        // Jika token judul sama dengan yang ingin dihapus, lewati baris ini
+        if (token != NULL && strcmp(token, title) == 0) {
+            continue;
         }
+
+        // Tulis baris ke file sementara
+        fprintf(temp_file, "%s", buffer);
     }
 
     fclose(file);
@@ -231,7 +238,7 @@ void delete(const char *title) {
         exit(EXIT_FAILURE);
     }
 
-    log_action("[DEL]", title);
+    log_action("[DEL]", title, "berhasil");
 }
 
 void edit(const char *title, const char *new_day, const char *new_genre, const char *new_title, const char *new_status) {
