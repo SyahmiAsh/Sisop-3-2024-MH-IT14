@@ -7,3 +7,7 @@ Laporan pengerjaan soal shift modul 3 Praktikum Sistem Operasi 2024 oleh Kelompo
 
 Soal Shift Modul 3
 no 1 
+
+no 2
+
+Catatan dari asisten : untuk fungsi pembagian jika bilangan pertama lebih kecil dari bilangan kedua seharusnya menampilkan nol
