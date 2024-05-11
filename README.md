@@ -7,9 +7,13 @@ Laporan pengerjaan soal shift modul 3 Praktikum Sistem Operasi 2024 oleh Kelompo
 
 ## Soal Shift Modul 3
 ## Soal 1 
+Pada zaman dahulu pada galaksi yang jauh-jauh sekali, hiduplah seorang Stelle. Stelle adalah seseorang yang sangat tertarik dengan Tempat Sampah dan Parkiran Luar Angkasa. Stelle memulai untuk mencari Tempat Sampah dan Parkiran yang terbaik di angkasa. Dia memerlukan program untuk bisa secara otomatis mengetahui Tempat Sampah dan Parkiran dengan rating terbaik di angkasa.
 
 ## Soal 2
 by Muhammad Faqih Husain
+Max Verstappen 🏎️ seorang pembalap F1 dan programer memiliki seorang adik bernama Min Verstappen (masih SD) sedang menghadapi tahap paling kelam dalam kehidupan yaitu perkalian matematika, Min meminta bantuan Max untuk membuat kalkulator perkalian sederhana (satu sampai sembilan). Sembari Max nguli dia menyuruh Min untuk belajar perkalian dari web (referensi) agar tidak bergantung pada kalkulator.
+(Wajib menerapkan konsep pipes dan fork seperti yang dijelaskan di modul Sisop. Gunakan 2 pipes dengan diagram seperti di modul 3).
+
 
 How to play
  - `./kalkulator -kali`
@@ -21,6 +25,7 @@ Catatan dari asisten : untuk fungsi pembagian jika bilangan pertama lebih kecil 
 
 ## Soal 3
 by Muhammad Faqih Husain
+Shall Leglerg🥶 dan Carloss Signs 😎 adalah seorang pembalap F1 untuk tim Ferrari 🥵. Mobil F1 memiliki banyak pengaturan, seperti penghematan ERS, Fuel, Tire Wear dan lainnya. Pada minggu ini ada race di sirkuit Silverstone. Malangnya, seluruh tim Ferrari diracun oleh Super Max Max pada hari sabtu sehingga seluruh kru tim Ferrari tidak bisa membantu Shall Leglerg🥶 dan Carloss Signs 😎 dalam race. Namun, kru Ferrari telah menyiapkan program yang bisa membantu mereka dalam menyelesaikan race secara optimal. Program yang dibuat bisa mengatur pengaturan - pengaturan dalam mobil F1 yang digunakan dalam balapan.
 
 Pengerjaan Soal no 3 dibagi kedalam 3 program yaitu `action.c` , `paddock.c` , dan `driver.c`
 
@@ -417,3 +422,46 @@ Isi dari file race.log
 
 
 ## Soal 4
+Lewis Hamilton 🏎 seorang wibu akut dan sering melewatkan beberapa episode yang karena sibuk menjadi asisten. Maka dari itu dia membuat list anime yang sedang ongoing (biar tidak lupa) dan yang completed (anime lama tapi pengen ditonton aja). Tapi setelah Lewis pikir-pikir malah kepikiran untuk membuat list anime. Jadi dia membuat file (harap diunduh) dan ingin menggunakan socket yang baru saja dipelajarinya untuk melakukan CRUD pada list animenya.
+
+Membuat struktur repository sebagai berikut:
+soal_4/
+    ├── change.log
+    ├── client/
+    │   └── client.c
+    ├── myanimelist.csv
+    └── server/
+        └── server.c
+
+untuk mendapatkan file `myanimelist.csv` dengan cara mengunduh file pada soal dan diunduh pada folder soal_4.
+command mengunduh filenya `wget -O myanimelist "https://drive.google.com/uc?export=download&id=10p_kzuOgaFY3WT6FVPJIXFbkej2s9f50"`
+
+Membuat file program server.c di dalam folder server.
+Membuat file program client.c di dalam folder client.
+
+Ketentuan program sebagai berikut:
+Client dan server terhubung melalui socket.
+
+Client berfungsi sebagai pengirim pesan dan dapat menerima pesan dari server.
+
+Server berfungsi sebagai penerima pesan dari client dan hanya menampilkan pesan perintah client saja.  
+
+Server digunakan untuk membaca myanimelist.csv. Dimana terjadi pengiriman data antara client ke server dan server ke client.
+- Menampilkan seluruh judul
+- Menampilkan judul berdasarkan genre
+- Menampilkan judul berdasarkan hari
+- Menampilkan status berdasarkan berdasarkan judul
+- Menambahkan anime ke dalam file myanimelist.csv
+- Melakukan edit anime berdasarkan judul
+- Melakukan delete berdasarkan judul
+- Selain command yang diberikan akan menampilkan tulisan “Invalid Command”
+
+Karena Lewis juga ingin track anime yang ditambah, diubah, dan dihapus. Maka dia membuat server dapat mencatat anime yang dihapus dalam sebuah log yang diberi nama change.log.
+Format: [date] [type] [massage]
+Type: ADD, EDIT, DEL
+Ex:
+[29/03/24] [ADD] Kanokari ditambahkan.
+[29/03/24] [EDIT] Kamis,Comedy,Kanokari,completed diubah menjadi Jumat,Action,Naruto,completed.
+[29/03/24] [DEL] Naruto berhasil dihapus.
+
+Koneksi antara client dan server tidak akan terputus jika ada kesalahan input dari client, cuma terputus jika user mengirim pesan “exit”. Program exit dilakukan pada sisi client.
