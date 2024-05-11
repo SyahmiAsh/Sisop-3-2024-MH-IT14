@@ -22,6 +22,11 @@ How to play
  - `./kalkulator -kurang`
  - `./kalkulator -bagi`
 
+Contoh Penggunaan
+
+![Screenshot (103)](https://github.com/SyahmiAsh/Sisop-3-2024-MH-IT14/assets/88548292/b168eed8-9cc5-480d-86e3-eea4a681dcc3)
+![Screenshot (103)](https://github.com/SyahmiAsh/Sisop-3-2024-MH-IT14/assets/88548292/3a4d38ca-2056-4ea0-922d-d40c7e93e5fd)
+
 Catatan dari asisten : untuk fungsi pembagian jika bilangan pertama lebih kecil dari bilangan kedua seharusnya menampilkan nol
 
 Before revisi
