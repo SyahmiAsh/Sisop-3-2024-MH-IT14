@@ -400,5 +400,11 @@ Struktur Direktori
 Interaksi antara driver dan Paddock
 ![Screenshot (100)](https://github.com/SyahmiAsh/Sisop-3-2024-MH-IT14/assets/88548292/1ac394ce-ece7-4aee-88b0-6bc0a4477baf)
 
+Mengecek apakah program berjalan secara daemon
+![Screenshot (101)](https://github.com/SyahmiAsh/Sisop-3-2024-MH-IT14/assets/88548292/7c77a431-c0b1-4cf5-a364-21b829d4a9d2)
+
+Isi dari file race.log
+![Screenshot (102)](https://github.com/SyahmiAsh/Sisop-3-2024-MH-IT14/assets/88548292/a95292ed-0b2a-4139-bca2-ed09385f6fd1)
+
 
 ## Soal 4
