@@ -149,7 +149,7 @@ int main(int argc, char const *argv[]) {
     char buffer[1024] = {0};
     char hello[1024];
 ```
-Membaca input dari user 
+Membaca input dari user dengan format <command> <info>
 ```
     printf("Enter your message: ");
     fgets(hello, 1024, stdin);
