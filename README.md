@@ -1542,6 +1542,10 @@ gcc -o client client.c
 ./client
 ```
 
+saat program dijalankan:
+![Screenshot (98)](https://github.com/SyahmiAsh/Sisop-3-2024-MH-IT14/assets/149950475/fe42932c-51b9-4484-9fc3-21faa3ca5d3c)
+
+Isi dari file.log:
 
 
 ### kendala
