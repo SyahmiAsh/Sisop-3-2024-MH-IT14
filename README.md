@@ -1220,7 +1220,7 @@ Library yang digunakan
 #define FILENAME "/home/ash23/Downloads/soalsisop/soal_4/myanimelist.csv"
 #define LOG_FILE "/home/ash23/Downloads/soalsisop/soal_4/change.log"
 ```
-- untuk mendefinisikan sebuah konstanta bernama `PORT` dengan nilai `8080`
+- Mendefinisikan konstanta bernama `PORT` dengan nilai `8080`
 - Mendefinisikan konstanta `BUFFER_SIZE` dengan nilai `1024`
 - Mendefinisikan konstanta `FILENAME` yang menyimpan alamat file `"myanimelist.csv"`
 - Mendefinisikan konstanta `LOG_FILE` yang menyimpan alamat file log `"change.log"`
@@ -1249,6 +1249,8 @@ void log_action(const char *type, const char *message, const char *info, const c
     }
 }
 ```
+File change.log akan dibuka, menyimpan waktu pada variabel timestamp, dan yang terakhir akan penulisan kan pada change.log dengan format yang diatas berdasarkan typenya lalu file akan ditutup
+
 Server digunakan untuk membaca myanimelist.csv. Dimana terjadi pengiriman data antara client ke server dan server ke client.
 - Menampilkan seluruh judul
 ```
@@ -1288,6 +1290,8 @@ void send_third_column(int client_socket) {
     fclose(file);
 }
 ```
+Dalam file `myanimelist.csv` judul terletak pada urutan ke-3 yang dipisahkan dengan (,) apabila sudah mendapatkan judul maka akan tertulis urutan dan judul yang ada di dalam file tersebut.
+
 - Menampilkan judul berdasarkan genre
 ```
 void send_titles_by_genre(int client_socket, const char *genre) {
@@ -1330,6 +1334,8 @@ void send_titles_by_genre(int client_socket, const char *genre) {
     fclose(file);
 }
 ```
+Dalam file `myanimelist.csv` genre terletak pada urutan ke-2 yang dipisahkan dengan (,) apabila sudah mendapatkan genre maka akan tertulis urutan dan judul yang sesuai dengan genre yang diinputkan dalam file tersebut dan apabila genre yang diinputkan tidak ada maka akan tertulis `"No titles found for the genre\n"`.
+
 - Menampilkan judul berdasarkan hari
 ```
 void send_titles_by_day(int client_socket, const char *day) {
@@ -1371,6 +1377,8 @@ void send_titles_by_day(int client_socket, const char *day) {
     fclose(file);
 }
 ```
+Dalam file `myanimelist.csv` hari terletak pada urutan ke-1 yang dipisahkan dengan (,) apabila sudah mendapatkan hari maka akan tertulis urutan dan judul yang sesuai dengan hari yang diinputkan dalam file tersebut dan apabila hari yang diinputkan tidak ada maka akan tertulis `"No titles found for the day\n"`.
+
 - Menampilkan status berdasarkan berdasarkan judul
 ```
 void send_status_by_titles(int client_socket, const char *titles) {
@@ -1412,6 +1420,8 @@ void send_status_by_titles(int client_socket, const char *titles) {
     fclose(file);
 }
 ```
+Dalam file `myanimelist.csv` judul terletak pada urutan ke-3 yang dipisahkan dengan (,) apabila sudah mendapatkan judul maka akan tertulis status dari judul yang diinputkan dalam file tersebut dan apabila judul yang diinputkan tidak ada maka akan tertulis `"No status found for the title\n"`.
+
 - Menambahkan anime ke dalam file myanimelist.csv
 ```
 void add(const char *day, const char *genre, const char *title, const char *status) {
@@ -1433,6 +1443,8 @@ void add(const char *day, const char *genre, const char *title, const char *stat
     log_action("[ADD]", title, "berhasil", "ditambah");
 }
 ```
+Fungsi ini akan membuka file `myanimelist.csv` lalu menuliskan hari,genre,title,status yang diinputkan ke dalam file tersebut dan menutup file lalu memanggil fungsi log_action. 
+
 - Melakukan delete berdasarkan judul
 ```
 void delete(int client_socket, const char *title) {
@@ -1503,6 +1515,8 @@ void delete(int client_socket, const char *title) {
     }
 }
 ```
+Fungsi ini akan membuka file `myanimelist.csv` lalu membaca file tersebut dan apabila judul yang diinputkan terdapat di dalam file maka baris itu akan di hapus, fungsi ini memakai file sementara untuk mengecek membuat salinan dari file yang asli dan apabila judul di temukan maka file yang asli akan di hapus dan di gantikan oleh file sementara yang akan diganti namanya sesuai dengan file yang asli. Apabila berhasil menghapus maka akan tertulis `"Anime berhasil dihapus.\n"` dan memanggil fungsi log_action, apabila sebaliknya maka akan tertulis `Anime dengan judul '%s' tidak ditemukan.\n` dan file sementara akan dihapus.
+
 - Melakukan edit anime berdasarkan judul
 ```
 void edit(const char *old_title, const char *new_day, const char *new_genre, const char *new_title, const char *new_status, int client_socket) {
@@ -1581,7 +1595,10 @@ void edit(const char *old_title, const char *new_day, const char *new_genre, con
         send(client_socket, response, strlen(response), 0); // Mengirim pesan ke client
     }
 }
+```
+Fungsi ini akan membuka file `myanimeliast` lalu mengambil setiap kata yang diinputkan dengan format <judul>,<hari.baru><genre.baru><judul.baru><status.baru>, dan apabila judul yang diinputkan terdapat di dalam file maka hari,genre,judul,status yang lama akan digantikan dengan yang baru lalu memanggil fungsi log_action. Fungsi ini memakai file salinan apabila judul cocok maka file yang asli akan di gantikan dengan file sementara, apabila judul tidak ada yang cocok file sementara akan di hapus dan tertulis `"Title '%s' not found.\n"`.
 
+```
 void process_command(int client_socket, char *command) {
     char *token;
 
@@ -1632,6 +1649,8 @@ void process_command(int client_socket, char *command) {
             send(client_socket, "Invalid command format\n", 23, 0);
         }
 ```
+Fungsi ini berguna untuk mengecek setiap command yang diinputkan apabila sesuai fungsi" yang ada maka akan menjalankan fungsinya dan apabila tidak ada yang sesuai maka akan menampilkan `“Invalid Command”`.
+
 - Selain command yang diberikan akan menampilkan tulisan “Invalid Command”
 ```
     } else {
@@ -1797,12 +1816,11 @@ gcc -o client client.c
 saat program dijalankan:
 ![Screenshot (98)](https://github.com/SyahmiAsh/Sisop-3-2024-MH-IT14/assets/149950475/fe42932c-51b9-4484-9fc3-21faa3ca5d3c)
 
-Isi dari file.log:
-
+Isi dari file change.log:
+![Screenshot (100)](https://github.com/SyahmiAsh/Sisop-3-2024-MH-IT14/assets/149950475/4aa18539-cf10-41b4-9b4e-08bf976adc3e)
 
 ### kendala
 Agak kesulitan dalam membuat fungsi-fungsinya sempat salah menamai file.csv nya lupa memanggil fungsi status.
 
 ### Revisi
 Ada beberapa revisi untuk program server yaitu, fungsi status, fungsi add, fungsi delete dan fungsi edit masih belum berjalan dengan benar.
-
