@@ -75,10 +75,8 @@ char* tireChange(char* tipe) {
     }
 }
 ```
-
 ### driver.c
 Menerima input dari user untuk kemudian dikirimkan menuju paddock.c dan juga menerima hasil dari paddock untuk ditampilkan ke terminal
-
 ```
 #include <stdio.h>
 #include <sys/socket.h>
@@ -346,3 +344,4 @@ int main(int argc, char const *argv[]) {
     return 0;
 }
 ```
+### Hasil Run
