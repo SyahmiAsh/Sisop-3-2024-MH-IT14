@@ -470,6 +470,258 @@ by Muhammad Faqih Husain
 Max Verstappen 🏎️ seorang pembalap F1 dan programer memiliki seorang adik bernama Min Verstappen (masih SD) sedang menghadapi tahap paling kelam dalam kehidupan yaitu perkalian matematika, Min meminta bantuan Max untuk membuat kalkulator perkalian sederhana (satu sampai sembilan). Sembari Max nguli dia menyuruh Min untuk belajar perkalian dari web (referensi) agar tidak bergantung pada kalkulator.
 (Wajib menerapkan konsep pipes dan fork seperti yang dijelaskan di modul Sisop. Gunakan 2 pipes dengan diagram seperti di modul 3).
 
+```
+#include<stdio.h> 
+#include<stdlib.h> 
+#include<unistd.h> 
+#include<sys/types.h> 
+#include<string.h> 
+#include<sys/wait.h> 
+#include<time.h>
+```
+Fungsi penjumlahan
+```
+int add(int a, int b) {
+    return a + b;
+}
+
+```
+Fungsi pengurangan
+```
+int subtract(int a, int b) {
+    return a - b;
+}
+```
+fungsi perkalian
+```
+
+int multiply(int a, int b) {
+    return a * b;
+}
+```
+Fungsi pembagian yang dibagi kedalam beberapa kasus, pembagian akan dibulatkan kebawah sehingga digunakan bilangan integer untuk melakukan pembagian
+```
+int divide(int a, int b) {
+    if(a < b){
+        return 0;
+    }
+    if(b != 0)
+        return a / b;
+    else
+        return -1; // return -1 if division by zero
+}
+```
+Melakukan konversi angka dari string ke angka mulai dari nol sampai dengan Sembilan sesuai Batasan soal
+```
+
+int stringToNumber(char *str) {
+    if(strcmp(str, "nol") == 0) return 0;
+    if(strcmp(str, "satu") == 0) return 1;
+    if(strcmp(str, "dua") == 0) return 2;
+    if(strcmp(str, "tiga") == 0) return 3;
+    if(strcmp(str, "empat") == 0) return 4;
+    if(strcmp(str, "lima") == 0) return 5;
+    if(strcmp(str, "enam") == 0) return 6;
+    if(strcmp(str, "tujuh") == 0) return 7;
+    if(strcmp(str, "delapan") == 0) return 8;
+    if(strcmp(str, "sembilan") == 0) return 9;
+    return -1; // return -1 jika input tidak valid
+}
+```
+Mengubah hasil perkalian dalam bentuk angka menjadi string, fungsi ini dapat menghandle mulai dari nol sampai dengan delapan puluh Sembilan karena bilangan maksimal yang dapat dihasilkan dari kalkulator ini adalah delapan puluh satu. Fungsi ini bekerja dengan memisahkan satuan, belasan, dan puluhan lalu mengkombinasikan mereka sesuai angka yang akan dikonversi.
+```
+
+void numberToString(int num, char *str) {
+    if(num < 0) {
+        strcpy(str, "ERROR");
+        return;
+    }
+    char *satuan[] = {"nol", "satu", "dua", "tiga", "empat", "lima", "enam", "tujuh", "delapan", "sembilan"};
+    char *belasan[] = {"sepuluh", "sebelas", "dua belas", "tiga belas", "empat belas", "lima belas", "enam belas", "tujuh belas", "delapan belas", "sembilan belas"};
+    char *puluhan[] = {"", "", "dua puluh", "tiga puluh", "empat puluh", "lima puluh", "enam puluh", "tujuh puluh", "delapan puluh"};
+
+    if(num <= 9) {
+        strcpy(str, satuan[num]);
+    } else if(num >= 10 && num <= 19) {
+        strcpy(str, belasan[num % 10]);
+    } else if(num % 10 == 0) {
+        strcpy(str, puluhan[num / 10]);
+    } else {
+        sprintf(str, "%s %s", puluhan[num / 10], satuan[num % 10]);
+    }
+}
+```
+Menuliskan log dengan format
+
+Format: [date] [type] [message]
+
+Type: KALI, TAMBAH, KURANG, BAGI
+
+Ex:
+
+[10/03/24 00:29:47] [KALI] tujuh kali enam sama dengan empat puluh dua.
+[10/03/24 00:30:00] [TAMBAH] sembilan tambah sepuluh sama dengan sembilan belas.
+[10/03/24 00:30:12] [KURANG] ERROR pada pengurangan
+
+```
+
+void writeLog(char *operation, char *message) {
+    FILE *file = fopen("histori.log", "a+");
+    if(file == NULL) {
+        printf("Error opening file!\n");
+        return;
+    }
+
+    time_t t = time(NULL);
+    struct tm tm = *localtime(&t);
+    fprintf(file, "[%02d/%02d/%02d %02d:%02d:%02d] [%s] %s\n", tm.tm_mday, tm.tm_mon + 1, tm.tm_year + 1900, tm.tm_hour, tm.tm_min, tm.tm_sec, operation, message);
+    fclose(file);
+}
+```
+Berikut ini merupakan fungsi utama
+```
+
+int main(int argc, char *argv[]) 
+{ 
+```
+Persiapan untuk melakukan pipe and fork
+```
+    int fd1[2]; // Used to store two ends of first pipe 
+    int fd2[2]; // Used to store two ends of second pipe 
+
+    char input_str1[100]; 
+    char input_str2[100];
+    pid_t p; 
+
+    if (pipe(fd1)==-1) 
+    { 
+        fprintf(stderr, "Pipe Failed" ); 
+        return 1; 
+    } 
+    if (pipe(fd2)==-1) 
+    { 
+        fprintf(stderr, "Pipe Failed" ); 
+        return 1; 
+    } 
+```
+Memasukkan input yaitu angka yang akan dihitung menggunakan kalkulator
+```
+
+    printf("Masukkan dua string:\n");
+    scanf("%s", input_str1); 
+    scanf("%s", input_str2);
+
+    p = fork(); 
+
+    if (p < 0) 
+    { 
+        fprintf(stderr, "fork Failed" ); 
+        return 1; 
+    } 
+    else if (p > 0) 
+    { 
+```
+Pada parent proses string diubah menjadi integer
+```
+        int num1 = stringToNumber(input_str1);
+        int num2 = stringToNumber(input_str2);
+        int result;
+```
+Kemudian input diproses sesuai dengan argument saat menjalankan fungsi
+```
+
+        if(strcmp(argv[1], "-tambah") == 0) {
+            result = add(num1, num2);
+        } else if(strcmp(argv[1], "-kurang") == 0) {
+            result = subtract(num1, num2);
+        } else if(strcmp(argv[1], "-kali") == 0) {
+            result = multiply(num1, num2);
+        } else if(strcmp(argv[1], "-bagi") == 0) {
+            result = divide(num1, num2);
+        }
+```
+Close reading end of first pipe 
+```
+        close(fd1[0]);
+
+```
+Write input string and close writing end of first pipe. 
+```
+        write(fd1[1], &result, sizeof(result)); 
+        close(fd1[1]); 
+```
+Wait for child to send a string 
+```
+        wait(NULL); 
+```
+ Close writing end of second pipe 
+```
+        close(fd2[1]);
+```
+Read string from child, print it and close reading end. 
+```
+        char concat_str[100]; 
+        read(fd2[0], concat_str, 100); 
+        printf("%s\n", concat_str); 
+        close(fd2[0]); 
+    } 
+```
+child process 
+```
+    else
+    { 
+```
+Close writing end of first pipe 
+```
+        close(fd1[1]);
+```
+ Read a string using first pipe 
+```
+        int result;
+        read(fd1[0], &result, sizeof(result)); 
+```
+Convert number to string
+```
+        char str[100];
+        numberToString(result, str);
+```
+Close both reading ends 
+```
+        close(fd1[0]); 
+        close(fd2[0]); 
+
+```
+Persiapan string yang akan di outputkan di terminal
+```
+        char operation[20];
+        if(strcmp(argv[1], "-tambah") == 0) {
+            strcpy(operation, "penjumlahan");
+        } else if(strcmp(argv[1], "-kurang") == 0) {
+            strcpy(operation, "pengurangan");
+        } else if(strcmp(argv[1], "-kali") == 0) {
+            strcpy(operation, "perkalian");
+        } else if(strcmp(argv[1], "-bagi") == 0) {
+            strcpy(operation, "pembagian");
+        }
+```
+Menampilkan hasil operasi pada terminal
+```
+        char final_str[200];
+        sprintf(final_str, "hasil %s %s dan %s adalah %s.", operation, input_str1, input_str2, str);
+```
+Menyimpan log dari operasi yang sudah dilakukan
+```
+        writeLog(operation, final_str);
+```
+Write concatenated string and close writing end 
+```
+        write(fd2[1], final_str, strlen(final_str)+1); 
+        close(fd2[1]); 
+
+        exit(0); 
+    } 
+}
+```
 
 How to play
  - `./kalkulator -kali`
