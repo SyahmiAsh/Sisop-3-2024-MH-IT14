@@ -404,6 +404,7 @@ Mengecek apakah program berjalan secara daemon
 ![Screenshot (101)](https://github.com/SyahmiAsh/Sisop-3-2024-MH-IT14/assets/88548292/7c77a431-c0b1-4cf5-a364-21b829d4a9d2)
 
 Isi dari file race.log
+
 ![Screenshot (102)](https://github.com/SyahmiAsh/Sisop-3-2024-MH-IT14/assets/88548292/a95292ed-0b2a-4139-bca2-ed09385f6fd1)
 
 
