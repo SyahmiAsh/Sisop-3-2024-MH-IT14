@@ -149,11 +149,12 @@ int main(int argc, char const *argv[]) {
     char buffer[1024] = {0};
     char hello[1024];
 ```
-Membaca input dari user
+Membaca input dari user 
 ```
     printf("Enter your message: ");
     fgets(hello, 1024, stdin);
 ```
+Membuat koneksi socker ke server
 ```
     if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
         printf("\n Socket creation error \n");
@@ -174,13 +175,20 @@ Membaca input dari user
         printf("\nConnection Failed \n");
         return -1;
     }
+```
+prefix untuk menyimpan command dan suffix untuk menyimpan info
+```
     char* prefix;
     char* suffix;
 ```
+Menjalankan fungsi `split_last_word_copy` untuk memisahkan command dan info. Kemudian, `write_log` untuk mencatat command dan info yang dikirimkan menuju server. `send()` melakukan pengiriman menuju server. 
 ```
     split_last_word_copy(hello, &prefix, &suffix);
     write_log("Driver", prefix, suffix);
     send(sock , hello , strlen(hello) , 0 );
+```
+`read()` menerima input dari server yang akan disimpan pada buffer. Kemudian isi dari buffer yaitu pesan dari paddock akan ditampilkan pada terminal 
+```
     valread = read( sock , buffer, 1024);
     printf("%s\n",buffer );
     return 0;
@@ -188,7 +196,7 @@ Membaca input dari user
 ```
 
 ### paddock.c
-
+Menerima input dari driver kemudian diolah dan dikirimkan kembali menuju driver
 ```
 #include <stdio.h>
 #include <sys/socket.h>
@@ -205,6 +213,10 @@ Membaca input dari user
 #include "actions.c"
 #include <time.h>
 #define PORT 8080
+
+```
+`split_last_word_copy` digunakan untuk memisahkan command dengan info. Misalnya `Tire Change medium` akan dipisahkan menjadi `Tire Change` dan `medium`. Hal ini diperlukan untuk melakukan pencatatan log.
+```
 
 void split_last_word_copy(const char* buffer, char** prefix, char** suffix) {
     char* buffer_copy = strdup(buffer);
@@ -223,6 +235,19 @@ void split_last_word_copy(const char* buffer, char** prefix, char** suffix) {
         (*suffix)[len - 1] = '\0';
     }
 }
+
+```
+`write_log` digunakan untuk mencatat interaksi antara driver dan paddock pada file race.log. Fungsi ini akan membuat file race.log jika file tersebut belum ada.
+
+Format log:
+
+[Source] [DD/MM/YY hh:mm:ss]: [Command] [Additional-info]
+
+ex :
+
+[Driver] [07/04/2024 08:34:50]: [Fuel] [55%]
+[Paddock] [07/04/2024 08:34:51]: [Fuel] [You can go]
+```
 
 void write_log(const char* source, const char* command, const char* additional_info) {
     FILE* log_file = fopen("/home/kali/Sisop/modul3/soal_3/server/race.log", "a+");
@@ -265,10 +290,18 @@ void daemonize() {
     umask(0);
     chdir("/");
 }
+```
+Berikut merupakan fungsi utama dari paddock.c
+```
 
 int main(int argc, char const *argv[]) {
+```
+Menjalankan program secara daemon
+```
     daemonize();
-
+```
+Membuat server socket
+```
     int server_fd, new_socket;
     struct sockaddr_in address;
     int opt = 1;
@@ -299,8 +332,12 @@ int main(int argc, char const *argv[]) {
         perror("listen");
         exit(EXIT_FAILURE);
     }
-
+```
+```
     while(1) {
+```
+Menunggu koneksi socket dari client yaitu driver.c
+```
         printf("\n+++++++ Waiting for new connection ++++++++\n\n");
         if ((new_socket = accept(server_fd, (struct sockaddr *)&address, (socklen_t*)&addrlen))<0) {
             perror("accept");
@@ -310,10 +347,15 @@ int main(int argc, char const *argv[]) {
         int pid;
         if ((pid = fork()) == 0) {
             close(server_fd);
-
+```
+`read()` menerima pesan dari driver kemudian disimpan pada buffer dan ditampilkan pada terminal
+```
             memset(buffer, 0, 1024);
             read(new_socket, buffer, 1024);
             printf("%s\n",buffer);
+```
+Mengecek command yang sesuai dengan pesan yang dikirimkan oleh driver kemudian memanggil fungsi dari program `action.c`. Output dari fungsi tersebut kemudian disimpan pada variable hasil.
+```
             char* hasil;
             if (strncmp(buffer, "Gap ", 4) == 0) {
             int value = atoi(buffer + 4);
@@ -328,9 +370,15 @@ int main(int argc, char const *argv[]) {
             int value = atoi(buffer + 5);
             hasil = tire(value);
             }
+```
+Memisahkan buffer menjadi prefix yang berisi command dan suffix yang berisi info
+```
             char* prefix;
             char* suffix;
             split_last_word_copy(buffer, &prefix, &suffix);
+```
+Mencatat Komunikasi yang dilakukan oleh paddock
+```
             write_log("Paddock", prefix, hasil);
             send(new_socket, hasil, strlen(hasil), 0);
             printf("Result message sent\n");
