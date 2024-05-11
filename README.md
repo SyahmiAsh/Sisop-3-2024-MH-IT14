@@ -394,6 +394,7 @@ Mencatat Komunikasi yang dilakukan oleh paddock
 ```
 ### Hasil Run
 Struktur Direktori
+
 ![Screenshot_2024-05-11_08_51_46](https://github.com/fqhhusain/Sisop-1-2024-MH-IT14/assets/88548292/b9f17cdc-5a79-4f54-a205-238d05e3cda4)
 
 ## Soal 4
