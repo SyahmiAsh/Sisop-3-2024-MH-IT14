@@ -25,9 +25,32 @@ How to play
 Catatan dari asisten : untuk fungsi pembagian jika bilangan pertama lebih kecil dari bilangan kedua seharusnya menampilkan nol
 
 Before revisi
+```
+void numberToString(int num, char *str) {
+    if(num < 0) {
+        strcpy(str, "ERROR");
+        return;
+    }
+    char *satuan[] = {"", "satu", "dua", "tiga", "empat", "lima", "enam", "tujuh", "delapan", "sembilan"};
+    char *belasan[] = {"sepuluh", "sebelas", "dua belas", "tiga belas", "empat belas", "lima belas", "enam belas", "tujuh belas", "delapan belas", "sembilan belas"};
+    char *puluhan[] = {"", "", "dua puluh", "tiga puluh", "empat puluh", "lima puluh", "enam puluh", "tujuh puluh", "delapan puluh"};
+
+    if(num <= 9) {
+        strcpy(str, satuan[num]);
+    } else if(num >= 10 && num <= 19) {
+        strcpy(str, belasan[num % 10]);
+    } else if(num % 10 == 0) {
+        strcpy(str, puluhan[num / 10]);
+    } else {
+        sprintf(str, "%s %s", puluhan[num / 10], satuan[num % 10]);
+    }
+}
+```
 
 After revisi
 
+Menambahkan nol pada array satuan dari yang sebelumnya merupakan string kosong
+```
 void numberToString(int num, char *str) {
     if(num < 0) {
         strcpy(str, "ERROR");
@@ -47,6 +70,7 @@ void numberToString(int num, char *str) {
         sprintf(str, "%s %s", puluhan[num / 10], satuan[num % 10]);
     }
 }
+```
 
 ## Soal 3
 by Muhammad Faqih Husain
