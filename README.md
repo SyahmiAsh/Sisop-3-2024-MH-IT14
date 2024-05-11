@@ -605,6 +605,10 @@ Persiapan untuk melakukan pipe and fork
     } 
 ```
 Memasukkan input yaitu angka yang akan dihitung menggunakan kalkulator
+
+dengan format  angka_pertama angka_kedua
+
+misal : tiga tujuh
 ```
 
     printf("Masukkan dua string:\n");
