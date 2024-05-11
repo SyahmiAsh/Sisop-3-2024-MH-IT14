@@ -26,30 +26,6 @@ Contoh dari nama file yang akan diautentikasi:
 contoh : 
 [07/04/2024 08:34:50] [Trash Can] [belobog_trashcan.csv]
 
-Contoh direktori awal:
-.
-├── auth.c
-├── microservices
-│   ├── database
-│   │   └── db.log
-│   ├── db.c
-│   └── rate.c
-└── new-data
-    ├── belobog_trashcan.csv
-    ├── ikn.csv
-    └── osaka_parkinglot.csv
-
-Contoh direktori akhir setelah dijalankan auth.c dan db.c:
-.
-├── auth.c
-├── microservices
-│   ├── database
-│   │   ├── belobog_trashcan.csv
-│   │   ├── db.log
-│   │   └── osaka_parkinglot.csv
-│   ├── db.c
-│   └── rate.c
-└── new-data
 
 ### Penyelesaian
 Untuk penyelesaian soal nomor 1 ini membutuhkan 3 program, yaitu `auth.c` , `auth.c` , dan `rate.c`
