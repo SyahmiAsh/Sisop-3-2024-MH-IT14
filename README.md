@@ -17,7 +17,7 @@ Catatan dari asisten : untuk fungsi pembagian jika bilangan pertama lebih kecil 
 Pengerjaan Soal no 3 dibagi kedalam 3 program yaitu `action.c` , `paddock.c` , dan `driver.c`
 
 ### actions.c
-
+Berisi fungsi-fungsi yang akan digunakan oleh `paddock.c` 
 ```
 #include <stdio.h>
 #include <string.h>
@@ -77,6 +77,7 @@ char* tireChange(char* tipe) {
 ```
 
 ### driver.c
+Menerima input dari user untuk kemudian dikirimkan menuju paddock.c dan juga menerima hasil dari paddock untuk ditampilkan ke terminal
 
 ```
 #include <stdio.h>
@@ -88,7 +89,9 @@ char* tireChange(char* tipe) {
 #include <arpa/inet.h>
 #include <time.h>
 #define PORT 8080
-
+```
+`split_last_word_copy` digunakan untuk memisahkan command dengan info. Misalnya `Tire Change medium` akan dipisahkan menjadi `Tire Change` dan `medium`. Hal ini diperlukan untuk melakukan pencatatan log.
+```
 void split_last_word_copy(const char* buffer, char** prefix, char** suffix) {
     char* buffer_copy = strdup(buffer);
     char* last_space = strrchr(buffer_copy, ' ');
@@ -106,7 +109,19 @@ void split_last_word_copy(const char* buffer, char** prefix, char** suffix) {
         (*suffix)[len - 1] = '\0';
     }
 }
+```
+`write_log` digunakan untuk mencatat interaksi antara driver dan paddock pada file race.log. Fungsi ini akan membuat file race.log jika file tersebut belum ada.
 
+Format log:
+
+[Source] [DD/MM/YY hh:mm:ss]: [Command] [Additional-info]
+
+ex :
+
+[Driver] [07/04/2024 08:34:50]: [Fuel] [55%]
+[Paddock] [07/04/2024 08:34:51]: [Fuel] [You can go]
+
+```
 void write_log(const char* source, const char* command, const char* additional_info) {
     FILE* log_file = fopen("/home/kali/Sisop/modul3/soal_3/server/race.log", "a+");
     if (log_file == NULL) {
@@ -126,18 +141,22 @@ void write_log(const char* source, const char* command, const char* additional_i
 
     fclose(log_file);
 }
-
-  
+```
+Berikut ini merupakan fungsi main 
+```
 int main(int argc, char const *argv[]) {
     struct sockaddr_in address;
     int sock = 0, valread;
     struct sockaddr_in serv_addr;
     char buffer[1024] = {0};
     char hello[1024];
-
+```
+Membaca input dari user
+```
     printf("Enter your message: ");
-    fgets(hello, 1024, stdin); // read the message from user
-
+    fgets(hello, 1024, stdin);
+```
+```
     if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
         printf("\n Socket creation error \n");
         return -1;
@@ -159,6 +178,8 @@ int main(int argc, char const *argv[]) {
     }
     char* prefix;
     char* suffix;
+```
+```
     split_last_word_copy(hello, &prefix, &suffix);
     write_log("Driver", prefix, suffix);
     send(sock , hello , strlen(hello) , 0 );
@@ -180,6 +201,9 @@ int main(int argc, char const *argv[]) {
 #include <signal.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+```
+`#include "actions.c"` digunakan untuk melakukan function import dari program `actions.c`
+```
 #include "actions.c"
 #include <time.h>
 #define PORT 8080
@@ -221,8 +245,9 @@ void write_log(const char* source, const char* command, const char* additional_i
 
     fclose(log_file);
 }
-
-
+```
+`daemonize()` untuk menjalankan program paddock secara daemon
+```
 void daemonize() {
     pid_t pid;
     pid = fork();
