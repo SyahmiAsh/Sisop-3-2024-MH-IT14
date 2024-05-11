@@ -428,17 +428,11 @@ Lewis Hamilton 🏎 seorang wibu akut dan sering melewatkan beberapa episode yan
 
 Membuat struktur repository sebagai berikut:
 
-soal_4/
-    ├── change.log
-    ├── client/
-    │   └── client.c
-    ├── myanimelist.csv
-    └── server/
-        └── server.c
+![Screenshot (97)](https://github.com/SyahmiAsh/Sisop-3-2024-MH-IT14/assets/149950475/65a5049a-c45d-4306-8ce7-6a0b635949a3)
 
 untuk mendapatkan file `myanimelist.csv` dengan cara mengunduh file pada soal dan diunduh pada folder soal_4.
 
-command mengunduh filenya `wget -O myanimelist "https://drive.google.com/uc?export=download&id=10p_kzuOgaFY3WT6FVPJIXFbkej2s9f50"`
+commandnya `wget -O myanimelist "https://drive.google.com/uc?export=download&id=10p_kzuOgaFY3WT6FVPJIXFbkej2s9f50"`
 
 Membuat file program server.c di dalam folder server.
 
@@ -463,11 +457,17 @@ Server digunakan untuk membaca myanimelist.csv. Dimana terjadi pengiriman data a
 - Selain command yang diberikan akan menampilkan tulisan “Invalid Command”
 
 Karena Lewis juga ingin track anime yang ditambah, diubah, dan dihapus. Maka dia membuat server dapat mencatat anime yang dihapus dalam sebuah log yang diberi nama change.log.
+
 Format: [date] [type] [massage]
+
 Type: ADD, EDIT, DEL
+
 Ex:
+
 [29/03/24] [ADD] Kanokari ditambahkan.
+
 [29/03/24] [EDIT] Kamis,Comedy,Kanokari,completed diubah menjadi Jumat,Action,Naruto,completed.
+
 [29/03/24] [DEL] Naruto berhasil dihapus.
 
 Koneksi antara client dan server tidak akan terputus jika ada kesalahan input dari client, cuma terputus jika user mengirim pesan “exit”. Program exit dilakukan pada sisi client.
