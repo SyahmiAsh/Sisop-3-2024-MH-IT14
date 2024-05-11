@@ -428,7 +428,15 @@ Lewis Hamilton 🏎 seorang wibu akut dan sering melewatkan beberapa episode yan
 
 Membuat struktur repository sebagai berikut:
 
-![Screenshot (97)](https://github.com/SyahmiAsh/Sisop-3-2024-MH-IT14/assets/149950475/65a5049a-c45d-4306-8ce7-6a0b635949a3)
+soal_4/
+  
+    ├── change.log
+    ├── client/
+    │   └── client.c
+    ├── myanimelist.csv
+    └── server/
+        └── server.c
+
 
 untuk mendapatkan file `myanimelist.csv` dengan cara mengunduh file pada soal dan diunduh pada folder soal_4.
 
