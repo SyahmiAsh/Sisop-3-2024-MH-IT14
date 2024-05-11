@@ -16,7 +16,7 @@ Catatan dari asisten : untuk fungsi pembagian jika bilangan pertama lebih kecil 
 
 Pengerjaan Soal no 3 dibagi kedalam 3 program yaitu `action.c` , `paddock.c` , dan `driver.c`
 
-#### actions.c
+### actions.c
 
 ```
 #include <stdio.h>
@@ -76,7 +76,7 @@ char* tireChange(char* tipe) {
 }
 ```
 
-driver.c
+### driver.c
 
 ```
 #include <stdio.h>
@@ -168,7 +168,7 @@ int main(int argc, char const *argv[]) {
 }
 ```
 
-paddock.c
+### paddock.c
 
 ```
 #include <stdio.h>
