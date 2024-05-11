@@ -6,8 +6,487 @@ Laporan pengerjaan soal shift modul 3 Praktikum Sistem Operasi 2024 oleh Kelompo
 3. Muhammad Syahmi Ash Shidqi  : 5027231085
 
 ## Soal Shift Modul 3
-## Soal 1 
-Pada zaman dahulu pada galaksi yang jauh-jauh sekali, hiduplah seorang Stelle. Stelle adalah seseorang yang sangat tertarik dengan Tempat Sampah dan Parkiran Luar Angkasa. Stelle memulai untuk mencari Tempat Sampah dan Parkiran yang terbaik di angkasa. Dia memerlukan program untuk bisa secara otomatis mengetahui Tempat Sampah dan Parkiran dengan rating terbaik di angkasa.
+## Soal 1
+Pada zaman dahulu pada galaksi yang jauh-jauh sekali, hiduplah seorang Stelle. Stelle adalah seseorang yang sangat tertarik dengan Tempat Sampah dan Parkiran Luar Angkasa. Stelle memulai untuk mencari Tempat Sampah dan Parkiran yang terbaik di angkasa. Dia memerlukan program untuk bisa secara otomatis mengetahui Tempat Sampah dan Parkiran dengan rating terbaik di angkasa. Programnya berbentuk microservice sebagai berikut:
+1. Dalam auth.c pastikan file yang masuk ke folder new-entry adalah file csv dan berakhiran  trashcan dan parkinglot. Jika bukan, program akan secara langsung akan delete file tersebut. 
+Contoh dari nama file yang akan diautentikasi:
+--- belobog_trashcan.csv
+--- osaka_parkinglot.csv
+2. Format data (Kolom)  yang berada dalam file csv adalah seperti berikut:
+![Screenshot (623)](https://github.com/SyahmiAsh/Sisop-3-2024-MH-IT14/assets/150339585/8f164a98-0c7b-470d-b9ff-88fbb568f042)
+![Screenshot (623) - Copy](https://github.com/SyahmiAsh/Sisop-3-2024-MH-IT14/assets/150339585/91521ed5-dbed-443c-9807-f6a1517728cb)
+
+3. File csv yang lolos tahap autentikasi akan dikirim ke shared memory. 
+
+4. Dalam rate.c, proses akan mengambil data csv dari shared memory dan akan memberikan output Tempat Sampah dan Parkiran dengan Rating Terbaik dari data tersebut.
+![Screenshot (624)](https://github.com/SyahmiAsh/Sisop-3-2024-MH-IT14/assets/150339585/326834d3-e6a3-4b99-9637-f5f39e3b1522)
+5. Pada db.c, proses bisa memindahkan file dari new-data ke folder microservices/database, WAJIB MENGGUNAKAN SHARED MEMORY.
+6. Log semua file yang masuk ke folder microservices/database ke dalam file db.log dengan contoh format sebagai berikut:
+[DD/MM/YY hh:mm:ss] [type] [filename]
+contoh : 
+[07/04/2024 08:34:50] [Trash Can] [belobog_trashcan.csv]
+
+Contoh direktori awal:
+.
+├── auth.c
+├── microservices
+│   ├── database
+│   │   └── db.log
+│   ├── db.c
+│   └── rate.c
+└── new-data
+    ├── belobog_trashcan.csv
+    ├── ikn.csv
+    └── osaka_parkinglot.csv
+
+Contoh direktori akhir setelah dijalankan auth.c dan db.c:
+.
+├── auth.c
+├── microservices
+│   ├── database
+│   │   ├── belobog_trashcan.csv
+│   │   ├── db.log
+│   │   └── osaka_parkinglot.csv
+│   ├── db.c
+│   └── rate.c
+└── new-data
+
+### Penyelesaian
+Untuk penyelesaian soal nomor 1 ini membutuhkan 3 program, yaitu `auth.c` , `auth.c` , dan `rate.c`
+
+### auth.c
+Secara garis besar program ini memiliki fitur sebagai berikut:
+- Mengautentikasi file yang berada di direktori `/new-data` berdasarkan nama file yang sesuai, apabila file tidak lolos autentikasi maka file akan secara otomatis dihapus
+- File yang lolos autentikasi akan dikirimkan menuju shared memory 
+
+```
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <dirent.h>
+#include <sys/ipc.h>
+#include <sys/shm.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <fcntl.h>
+#include <unistd.h>
+
+#define MAX_FILENAME_LENGTH 512
+#define MAX_FILE_CONTENT_LENGTH 1024
+#define MAX_FILES 10
+#define SHARED_MEMORY_KEY 4321
+#define SHARED_MEMORY_SIZE (sizeof(FileInfo) * MAX_FILES)
+
+typedef struct {
+    char filename[MAX_FILENAME_LENGTH];
+    char content[MAX_FILE_CONTENT_LENGTH];
+} FileInfo;
+```
+`struct` berguna untuk menyimpan data dalam bentuk array dan memudahkan ketika proses pemindahan data menuju shared memory 
+
+Kode berikut merupakan fungsi untuk mengecek apakah nama file yang ada di dalam direktori `/new-data` sudah sesuai dengan ketentuan atau belum, yaitu file dengan akhiran `parkinglot.csv` atau `trashcan.csv`
+
+```
+int cek_file(const char *filename) {
+
+    //Cek apakah nama file berakhiran dengan "parkinglot.csv" atau "trashcan.csv"
+    if (strstr(filename, "parkinglot.csv") || strstr(filename, "trashcan.csv")) {
+        return 1; 
+    } else {
+        return 0; // File selain csv tidak valid
+    }
+}
+```
+
+Kode berikut ini merupakan fungsi untuk membuat dan mengakses shared memory 
+```
+void file_lolos() {
+    DIR *dir;
+    struct dirent *entry;
+
+    //Membuka direktori folder yang diinginkan, new-data
+    dir = opendir("new-data");
+    if (dir == NULL) {
+        perror("Error opening directory");
+        exit(EXIT_FAILURE);
+    }
+    
+    //Membuat shared memory
+    int shmid = shmget(SHARED_MEMORY_KEY, SHARED_MEMORY_SIZE, IPC_CREAT | 0666);
+    if (shmid < 0) {
+        perror("Error creating shared memory");
+        exit(EXIT_FAILURE);
+    }
+    
+    //Menghubungkan shared memory ke ruang alamat proses
+    FileInfo *shmaddr = (FileInfo *) shmat(shmid, NULL, 0);
+    if (shmaddr == (FileInfo *) -1) {
+        perror("Error attaching shared memory");
+        exit(EXIT_FAILURE);
+    }
+```
+
+Kode berikut merupakan fungsi untuk memindahkan file dari direktori `/new-data` yang sesuai beserta data didalamnya menuju ke dalam shared memory dengan menggunakan looping hingga semua file telah selesai dipindah. Sedangkan untuk file yang tidak sesuai maka akan secara otomatis dihapus oleh program dengan `remove`. Pertamanya program akan membuka file, lalu membaca dan menyalin file lalu memasukkannya ke dalam shared memory
+```
+    int file_count = 0;
+    
+
+    //Looping untuk memindah file menuju shared memory 
+    while ((entry = readdir(dir)) != NULL && file_count < MAX_FILES) {
+        if (entry->d_type == DT_REG) { 
+            char filename[MAX_FILENAME_LENGTH];
+            snprintf(filename, MAX_FILENAME_LENGTH, "new-data/%s", entry->d_name);
+
+            //Menyalin nama file dan isi file
+            if (cek_file(entry->d_name)) {
+                strcpy(shmaddr[file_count].filename, entry->d_name);
+
+                FILE *fp = fopen(filename, "r");
+                if (fp == NULL) {
+                    perror("Error opening file");
+                    exit(EXIT_FAILURE);
+                }
+
+                fread(shmaddr[file_count].content, 1, MAX_FILE_CONTENT_LENGTH, fp);
+
+                fclose(fp);
+
+                printf("File berhasil disimpan di shared memory:\t[%s]\n", shmaddr[file_count].filename);
+
+                file_count++;
+            } else {
+
+                //File yang tidak sesuai akan dihapus
+
+                printf("File tidak valid, dihapus:\t[%s]\n", entry->d_name);
+                
+                remove(filename);
+            }
+        }
+    }
+
+    //Melepaskan shared memory
+    shmdt((void *) shmaddr);
+
+    closedir(dir);
+}
+
+int main() {
+    file_lolos();
+    return 0;
+}
+```
+
+### db.c
+Secara garis besar program ini memiliki fitur sebagai berikut:
+- Menyalin file dari shared memory kedalam direktori `/database`
+- Mencatat log penyalinan file kedalam file db.log di dalam direktori `/database`
+- Menghapus file asli yang berada di direktori `/new-data`
+
+```
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/ipc.h>
+#include <sys/shm.h>
+#include <unistd.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <time.h>
+
+#define MAX_FILENAME_LENGTH 512
+#define MAX_FILE_CONTENT_LENGTH 1024
+#define MAX_FILES 10
+#define SHARED_MEMORY_KEY 4321
+#define SHARED_MEMORY_SIZE (sizeof(FileInfo) * MAX_FILES)
+
+typedef struct {
+    char filename[MAX_FILENAME_LENGTH];
+    char content[MAX_FILE_CONTENT_LENGTH];
+} FileInfo;
+```
+`struct` berguna untuk menyimpan data dalam bentuk array dan memudahkan ketika proses pemindahan data dari shared memory menuju direktori `/database`
+
+Berikut ini merupakan fungsi untuk menentukan tipe file berdasarkan nama file, jika file memiliki `trashcan` maka file akan disimpan sebagai tipe`Trash Can`, dan jika file memiliki `parkinglot` maka file akan disimpan sebagai tipe `Parking Lot`
+```
+void tipe_file(const char *filename, char *type) {
+    if (strstr(filename, "trashcan") || strstr(filename, "TrashCan")) {
+        strcpy(type, "Trash Can");
+    } else if (strstr(filename, "parkinglot") || strstr(filename, "ParkingLot")) {
+        strcpy(type, "Parking Lot");
+    } 
+}
+```
+
+Berikut ini merupakan fungsi untuk mencatat proses penyalinan file dari shared memory menuju direktori `./database` kedalam file db.log yang berada di dalam direktori `./database/db.log`
+-- Proses ini akan mencari waktu real dengan lokasi saat ini
+-- Mencari db.log, jika tidak ada/belum dibuat maka akan otomatis membuat file db.log, jika sudah tersedia maka akan dibuka dan memunculkan pesan catatan sesuai dengan format 
+```
+void catat_log(const char *filename, const char *type) {
+    time_t current_time;
+    struct tm *local_time;
+    char time_string[80];
+
+    current_time = time(NULL);
+    local_time = localtime(&current_time);
+
+    strftime(time_string, sizeof(time_string), "[%d/%m/%Y %H:%M:%S]", local_time);
+
+    //Untuk mencari dan membuka file db.log
+    FILE *log_file = fopen("database/db.log", "a");
+    if (log_file == NULL) {
+        log_file = fopen("database/db.log", "w");
+
+        if (log_file == NULL) {
+            perror("Error creating log file");
+            exit(EXIT_FAILURE);
+        }
+
+        fprintf(log_file, "Log File Created\n");
+    }
+
+    fprintf(log_file, "%s\t[%s]\t[%s]\n", time_string, type, filename);
+
+    fclose(log_file);
+}
+```
+
+Berikut ini merupakan proses untuk menyalin file yang ada di dalam shared memory menuju direktori `./database`, setelah berhasil memindah maka program akan memanggil proses pencatatan ke dalam file db.log, serta menghapus file asli yang berada di direktori `./new-data`
+```
+int main() {
+    //Mendapatkan akses ke shared memory yang sama
+    int shmid = shmget(SHARED_MEMORY_KEY, SHARED_MEMORY_SIZE, 0666);
+    if (shmid < 0) {
+        perror("Error accessed shared memory");
+        exit(EXIT_FAILURE);
+    }
+
+    //Menghubungkan shared memory ke ruang alamat proses
+    FileInfo *shmaddr = (FileInfo *) shmat(shmid, NULL, 0);
+    if (shmaddr == (FileInfo *) -1) {
+        perror("Error attaching shared memory");
+        exit(EXIT_FAILURE);
+    }
+
+    //Mendapatkan jalur direktori saat ini
+    char cwd[1024];
+    if (getcwd(cwd, sizeof(cwd)) == NULL) {
+        perror("Error getting current directory");
+        exit(EXIT_FAILURE);
+    }
+
+    //Menambahkan "/database" ke jalur direktori saat ini
+    strcat(cwd, "/database");
+
+    //Membuat folder database jika belum ada
+    struct stat st = {0};
+    if (stat(cwd, &st) == -1) {
+        mkdir(cwd, 0700);
+    }
+
+    //Menyalin file dari shared memory ke folder database
+    for (int i = 0; i < MAX_FILES; ++i) {
+        if (strlen(shmaddr[i].filename) > 0) {
+            char dest_path[MAX_FILENAME_LENGTH + 1024]; 
+
+            snprintf(dest_path, sizeof(dest_path), "%s/%s", cwd, shmaddr[i].filename);
+
+            FILE *fp = fopen(dest_path, "w");
+
+            if (fp == NULL) {
+                perror("Error creating file");
+                continue;
+            }
+
+            fwrite(shmaddr[i].content, 1, strlen(shmaddr[i].content), fp);
+
+            fclose(fp);
+
+            printf("Berhasil memindah file ke database : %s\n", shmaddr[i].filename);
+
+            //Menentukan jenis berdasarkan nama file
+            char type[MAX_FILENAME_LENGTH];
+            tipe_file(shmaddr[i].filename, type);
+
+            //Mencatat log
+            catat_log(shmaddr[i].filename, type);
+
+            //Menghapus file asli dari folder new-data setelah menyalinnya
+            char source_path[MAX_FILENAME_LENGTH + 1000];
+
+            snprintf(source_path, sizeof(source_path), "../new-data/%s", shmaddr[i].filename);
+
+            if (remove(source_path) != 0) {
+                perror("Error deleting original file");
+            }
+
+        }
+    }
+
+    //Melepaskan shared memory
+    shmdt((void *) shmaddr);
+
+    return 0;
+}
+```
+
+### rate.c
+Secara garis besar program ini memiliki fitur sebagai berikut:
+- Mengurutkan data berdasarkan rating tertinggi 
+- Menampilkan output berupa data dengan rating tertinggi untuk tiap file `Trashcan` dan `Parkinglot`
+ 
+
+```
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <dirent.h>
+#include <sys/ipc.h>
+#include <sys/shm.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <fcntl.h>
+#include <unistd.h>
+
+#define MAX_FILENAME_LENGTH 512
+#define MAX_FILE_CONTENT_LENGTH 1024
+#define MAX_FILES 10
+#define SHARED_MEMORY_KEY 4321
+#define SHARED_MEMORY_SIZE (sizeof(FileInfo) * MAX_FILES)
+
+typedef struct {
+    char filename[MAX_FILENAME_LENGTH];
+    char content[MAX_FILE_CONTENT_LENGTH];
+} FileInfo;
+```
+`struct` berguna untuk menyimpan data dalam bentuk array dan memudahkan ketika proses pemindahan data menuju shared memory 
+
+Berikut ini merupakan fungsi untuk memisahkan antara nama dan rating yang dibedakan oleh koma `,`
+```
+void nama_rating(const char *content, char *name, float *rating) {
+    sscanf(content, "%[^,], %f", name, rating);
+}
+```
+
+Berikut merupakan fungsi untuk membandingkan rating dan mencari nilai rating tertinggi 
+```
+void print_ratingmx(const char *filename, const char *content) {
+
+    // Memisahkan dan menyimpan rating dari konten file
+    char temp_content[MAX_FILE_CONTENT_LENGTH];
+    strcpy(temp_content, content); 
+
+    float highest_rating = 0.0;
+    char highest_rated_name[MAX_FILENAME_LENGTH] = "";
+
+    char *token = strtok(temp_content, "\n"); 
+    token = strtok(NULL, "\n"); 
+   
+    //Looping untuk mencari rating tertinggi
+    while (token != NULL) {
+        char name[MAX_FILENAME_LENGTH];
+        float rating;
+        nama_rating(token, name, &rating);
+
+        if (rating > highest_rating) {
+            highest_rating = rating;
+            strcpy(highest_rated_name, name);
+        }
+
+        token = strtok(NULL, "\n");
+    }
+
+
+    printf("Type: %s\n", strstr(filename, "parkinglot") ? "Parking Lot" : "Trash Can");
+    printf("Filename: %s\n", filename);
+    printf("----------------------\n");
+    printf("Name: %s\n", highest_rated_name);
+    printf("Rating: %.1f\n", highest_rating);
+    printf("--------------------------------\n\n");
+}
+```
+
+Ini merupakan fungsi utama untuk mengakses shared memory yang sama dengan program yang lain lalu memanggil fungsi-fungsi di atas 
+```
+int main() {
+    //Mendapatkan akses ke shared memory yang sama
+    int shmid = shmget(SHARED_MEMORY_KEY, SHARED_MEMORY_SIZE, 0666);
+    if (shmid < 0) {
+        perror("Error accessing shared memory");
+        exit(EXIT_FAILURE);
+    }
+
+    //Menghubungkan shared memory ke ruang alamat proses
+    FileInfo *shmaddr = (FileInfo *) shmat(shmid, NULL, 0);
+    if (shmaddr == (FileInfo *) -1) {
+        perror("Error attaching shared memory");
+        exit(EXIT_FAILURE);
+    }
+
+    //Membaca dan mencetak rating tertinggi dari isi file di shared memory
+    for (int i = 0; i < MAX_FILES; ++i) {
+        if (strlen(shmaddr[i].filename) > 0) {
+            print_ratingmx(shmaddr[i].filename, shmaddr[i].content);
+        }
+    }
+
+    //Melepaskan shared memory
+    shmdt((void *) shmaddr);
+
+    return 0;
+}
+```
+
+### Error Dalam Pengerjaan
+Terjadi eror saat memindahkan file dari shared memory menuju direktori `./database`
+![Screenshot (620)](https://github.com/SyahmiAsh/Sisop-3-2024-MH-IT14/assets/150339585/c0b27700-25f3-44e1-b1b7-cad5dafe4dcb)
+
+Terjadi eror tidak terbuat shared memory dan tidak terdeteksi saat dicek dengan `ipcs`
+![Screenshot (618)](https://github.com/SyahmiAsh/Sisop-3-2024-MH-IT14/assets/150339585/ad77fb0a-69a4-4cc2-bfd4-6a91a360b8af)
+
+### Dokumentasi Running
+##### Direktori sebelum menjalankan program `auth.c` dan `db.c`
+![Screenshot (625)](https://github.com/SyahmiAsh/Sisop-3-2024-MH-IT14/assets/150339585/ac4debba-aa06-4b23-9d07-121c194d65f8)
+![Screenshot (626)](https://github.com/SyahmiAsh/Sisop-3-2024-MH-IT14/assets/150339585/18e27066-5385-42f7-85e3-2588a3127a87)
+![Screenshot (629)](https://github.com/SyahmiAsh/Sisop-3-2024-MH-IT14/assets/150339585/1e3e3079-5bd6-40c0-bfac-50095deddb81)
+![Screenshot (630)](https://github.com/SyahmiAsh/Sisop-3-2024-MH-IT14/assets/150339585/093e0193-87c6-46b3-b616-0ecb34186e4f)
+![Screenshot (631)](https://github.com/SyahmiAsh/Sisop-3-2024-MH-IT14/assets/150339585/2dac437f-4232-4345-a024-3df302b1705a)
+![Screenshot (632)](https://github.com/SyahmiAsh/Sisop-3-2024-MH-IT14/assets/150339585/7ecf5563-4f48-4bf7-b671-4bfa86b47d3d)
+![Screenshot (628)](https://github.com/SyahmiAsh/Sisop-3-2024-MH-IT14/assets/150339585/7437862b-81da-4087-be05-32daa47c4fd6)
+
+
+
+##### Menjalankan `auth.c`
+![Screenshot (634)](https://github.com/SyahmiAsh/Sisop-3-2024-MH-IT14/assets/150339585/ee4de861-c154-4784-9857-742d1e67c277)
+File yang tidak sesuai akan dihapus dari direktori `./new-data`
+![Screenshot (636)](https://github.com/SyahmiAsh/Sisop-3-2024-MH-IT14/assets/150339585/15e85588-c256-4ff1-983c-e9de57cad83a)
+
+
+##### Menjalankan `db.c`
+![Screenshot (634) - Copy](https://github.com/SyahmiAsh/Sisop-3-2024-MH-IT14/assets/150339585/9e80274b-e60b-46a1-9798-638c36c1ad27)
+File disalin dari shared memori menuju ke dalam direktori `./database`
+![Screenshot (633)](https://github.com/SyahmiAsh/Sisop-3-2024-MH-IT14/assets/150339585/2250dfe6-8b28-4037-a4be-6d97ff86b657)
+
+
+##### Catatan log dalam file db.log
+![Screenshot (637)](https://github.com/SyahmiAsh/Sisop-3-2024-MH-IT14/assets/150339585/0a1458ed-4064-4edc-a926-0c8bf0188ada)
+
+##### Menjalankan `rate.c`
+![Screenshot (635)](https://github.com/SyahmiAsh/Sisop-3-2024-MH-IT14/assets/150339585/6200bcc0-607e-4532-ad98-a7a49ee89359)
+
+
+##### Direktori sesudah menjalankan program `auth.c` dan `db.c`
+![Screenshot (625)](https://github.com/SyahmiAsh/Sisop-3-2024-MH-IT14/assets/150339585/ac4debba-aa06-4b23-9d07-121c194d65f8)
+File di dalam direktori `./new-data` telah dihapus oleh program `db.c`
+![Screenshot (639)](https://github.com/SyahmiAsh/Sisop-3-2024-MH-IT14/assets/150339585/94559446-99f7-458b-a422-731e9fc2018b)
+![Screenshot (632)](https://github.com/SyahmiAsh/Sisop-3-2024-MH-IT14/assets/150339585/7ecf5563-4f48-4bf7-b671-4bfa86b47d3d)
+File berhasil disalin menuju direktori `./database`
+![Screenshot (638)](https://github.com/SyahmiAsh/Sisop-3-2024-MH-IT14/assets/150339585/1ffc56bd-26c0-409d-9250-5816d12fcd26)
+
+
+
+### Revisi
+Tidak ada revisi atau catatan dari asisten lab praktikum
 
 ## Soal 2
 by Muhammad Faqih Husain
