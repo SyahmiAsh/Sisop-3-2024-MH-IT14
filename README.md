@@ -6,13 +6,15 @@ Laporan pengerjaan soal shift modul 3 Praktikum Sistem Operasi 2024 oleh Kelompo
 3. Muhammad Syahmi Ash Shidqi  : 5027231085
 
 ## Soal Shift Modul 3
-no 1 
+### Soal 1 
 
-no 2
+### Soal 2
 
 Catatan dari asisten : untuk fungsi pembagian jika bilangan pertama lebih kecil dari bilangan kedua seharusnya menampilkan nol
 
-no 3
+### Soal 3
+
+Pengerjaan Soal no 3 dibagi kedalam 3 program yaitu `action.c` , `paddock.c` , dan `driver.c`
 
 actions.c
 
