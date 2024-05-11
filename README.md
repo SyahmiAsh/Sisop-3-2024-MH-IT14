@@ -559,9 +559,9 @@ Type: KALI, TAMBAH, KURANG, BAGI
 
 Ex:
 
-[10/03/24 00:29:47] [KALI] tujuh kali enam sama dengan empat puluh dua.
-[10/03/24 00:30:00] [TAMBAH] sembilan tambah sepuluh sama dengan sembilan belas.
-[10/03/24 00:30:12] [KURANG] ERROR pada pengurangan
+- [10/03/24 00:29:47] [KALI] tujuh kali enam sama dengan empat puluh dua.
+- [10/03/24 00:30:00] [TAMBAH] sembilan tambah sepuluh sama dengan sembilan belas.
+- [10/03/24 00:30:12] [KURANG] ERROR pada pengurangan
 
 ```
 
@@ -708,7 +708,11 @@ Persiapan string yang akan di outputkan di terminal
             strcpy(operation, "pembagian");
         }
 ```
-Menampilkan hasil operasi pada terminal
+Menampilkan hasil operasi pada terminal dengan format sebagai berikut 
+- perkalian	: “hasil perkalian tiga dan tujuh adalah dua puluh satu.”
+- penjumlahan	: “hasil penjumlahan tiga dan tujuh adalah sepuluh.”
+- pengurangan	: “hasil pengurangan tujuh dan tiga adalah empat.”
+- pembagian	: “hasil pembagian tujuh dan tiga adalah dua.”
 ```
         char final_str[200];
         sprintf(final_str, "hasil %s %s dan %s adalah %s.", operation, input_str1, input_str2, str);
