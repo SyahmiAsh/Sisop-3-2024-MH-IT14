@@ -528,7 +528,7 @@ int stringToNumber(char *str) {
     return -1; // return -1 jika input tidak valid
 }
 ```
-Mengubah hasil perkalian dalam bentuk angka menjadi string, fungsi ini dapat menghandle mulai dari nol sampai dengan delapan puluh Sembilan karena bilangan maksimal yang dapat dihasilkan dari kalkulator ini adalah delapan puluh satu. Fungsi ini bekerja dengan memisahkan satuan, belasan, dan puluhan lalu mengkombinasikan mereka sesuai angka yang akan dikonversi.
+Mengubah hasil perkalian dalam bentuk angka menjadi string, fungsi ini dapat menghandle mulai dari nol sampai dengan delapan puluh Sembilan karena bilangan maksimal yang dapat dihasilkan dari kalkulator ini adalah delapan puluh satu. Fungsi ini bekerja dengan memisahkan satuan, belasan, dan puluhan lalu mengkombinasikan mereka sesuai angka yang akan dikonversi. Kalkulator ini hanya menghandle bilangan nol atau positif sehingga saat num < 0 maka fungsi ini akan menghasilkan ERROR.
 ```
 
 void numberToString(int num, char *str) {
