@@ -11,6 +11,12 @@ Laporan pengerjaan soal shift modul 3 Praktikum Sistem Operasi 2024 oleh Kelompo
 ## Soal 2
 by Muhammad Faqih Husain
 
+How to play
+ - `./kalkulator -kali`
+ - `./kalkulator -tambah`
+ - `./kalkulator -kurang`
+ - `./kalkulator -bagi`
+
 Catatan dari asisten : untuk fungsi pembagian jika bilangan pertama lebih kecil dari bilangan kedua seharusnya menampilkan nol
 
 ## Soal 3
