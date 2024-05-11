@@ -427,6 +427,7 @@ Isi dari file race.log
 Lewis Hamilton 🏎 seorang wibu akut dan sering melewatkan beberapa episode yang karena sibuk menjadi asisten. Maka dari itu dia membuat list anime yang sedang ongoing (biar tidak lupa) dan yang completed (anime lama tapi pengen ditonton aja). Tapi setelah Lewis pikir-pikir malah kepikiran untuk membuat list anime. Jadi dia membuat file (harap diunduh) dan ingin menggunakan socket yang baru saja dipelajarinya untuk melakukan CRUD pada list animenya.
 
 Membuat struktur repository sebagai berikut:
+
 soal_4/
     ├── change.log
     ├── client/
@@ -436,12 +437,15 @@ soal_4/
         └── server.c
 
 untuk mendapatkan file `myanimelist.csv` dengan cara mengunduh file pada soal dan diunduh pada folder soal_4.
+
 command mengunduh filenya `wget -O myanimelist "https://drive.google.com/uc?export=download&id=10p_kzuOgaFY3WT6FVPJIXFbkej2s9f50"`
 
 Membuat file program server.c di dalam folder server.
+
 Membuat file program client.c di dalam folder client.
 
 Ketentuan program sebagai berikut:
+
 Client dan server terhubung melalui socket.
 
 Client berfungsi sebagai pengirim pesan dan dapat menerima pesan dari server.
