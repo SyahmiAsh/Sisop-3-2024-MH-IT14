@@ -393,4 +393,6 @@ Mencatat Komunikasi yang dilakukan oleh paddock
 }
 ```
 ### Hasil Run
+![Screenshot_2024-05-11_08_51_46](https://github.com/fqhhusain/Sisop-1-2024-MH-IT14/assets/88548292/0e372ce9-5b4d-407d-a61e-77fecdb8d866)
+
 ## Soal 4
